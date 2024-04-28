@@ -1,0 +1,2 @@
+使用 GameLauncher.bat 可以加载游戏。
+也可以用自己的 java 开发工具运行 javacode.GameLaucher 类
