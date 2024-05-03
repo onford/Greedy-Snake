@@ -53,7 +53,7 @@ public class GameSegment {
     // 用于显示暂停的字符串（也即 PAUSE）的起点坐标 (pauseX,pauseY)
     public static int pauseX = 150,pauseY = 250;
     // 游戏时蛇的初始长度 initialLength 以及初始分数 initialScore
-    public static int initialLength = 20,initialScore = 2000;
+    public static int initialLength = 4,initialScore = 2000;
     // 游戏时答辩方块造成单位蛇身的分数损失 shitScoreDec 以及单次答辩袭击所能够损失成为的最低分数 shitScoreLBound
     public static int shitScoreDec = 300,shitScoreLBound = 1000;
     // 游戏时奖励方块给予的分数加成
@@ -69,11 +69,13 @@ public class GameSegment {
     // GameOver 蛇身闪动后，需要展示游戏结算画面，两者之间时间间隔的毫秒数。
     public static int gameOverSleepPeriod = 1000;
     // 游戏开始时惩罚方块第一次获得生成机会的时间毫秒数
-    public static int punishInitPeriod = 3600;
+    public static int punishInitPeriod = 18000;
     // 惩罚方块被吃掉后，距离下次生成机会到来的时间毫秒数
-    public static int punishSummonPeriod = 5400;
+    public static int punishSummonPeriod = 27000;
     // 游戏开始时彩蛋方块第一次获得生成机会的时间毫秒数
-    public static int superInitPeriod = 3600;
+    public static int superInitPeriod = 18000;
     // 彩蛋方块被吃掉后，距离下次生成机会到来的时间毫秒数
-    public static int superSummonPeriod = 10800;
+    public static int superSummonPeriod = 54000;
+    // 游戏开始时答辩方块第一次获得生成机会的时间毫秒数
+    public static int shitInitPeriod = 72000;
 }

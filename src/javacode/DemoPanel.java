@@ -39,15 +39,19 @@ public class DemoPanel extends JPanel {
                         this.fillObject(i,j,GameSegment.snakeBodyColor,g);
                     else if(demo.data[i][j] == GameObject.awardTag)
                         this.fillObject(i,j,GameSegment.awardColor,g);
-                    else if(demo.data[i][j] == GameObject.punishTag){
-                        this.fillObject(i,j,GameSegment.punishColor,g);
+                    else if(demo.data[i][j] == GameObject.punishTag) {
+                        this.fillObject(i, j, GameSegment.punishColor, g);
                     }
-                    else if(demo.data[i][j] == GameObject.superTag && this.demo.superObj.visible())
-                        this.fillObject(i,j, GameSegment.superColor,g);
+            for(Super superObj : this.demo.superList){
+                if(superObj.visible() && superObj.exists)
+                    this.fillObject(superObj.x,superObj.y,GameSegment.superColor,g);
+            }
             if(demo.data[demo.headX][demo.headY] > 0)
                 this.fillObject(demo.headX,demo.headY,GameSegment.snakeHeadColor,g);
-            if(demo.shitObj.exists)
-                this.fillObject(demo.shitObj.x,demo.shitObj.y,GameSegment.shitColor,g);
+            for(Shit shitObj : this.demo.shitList){
+                if(shitObj.exists)
+                    this.fillObject(shitObj.x,shitObj.y,GameSegment.shitColor,g);
+            }
             if(demo.movingPix > 0){
                 cutObject(demo.tailX,demo.tailY,demo.data[demo.tailX][demo.tailY],GameSegment.backGroundColor,g);
                 cutObject(demo.headX,demo.headY,demo.data[demo.headX][demo.headY],GameSegment.snakeBodyColor,g);

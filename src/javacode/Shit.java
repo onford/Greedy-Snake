@@ -3,9 +3,9 @@ package javacode;
 import java.awt.*;
 
 public class Shit extends GameObject{
+    public static int tag = GameObject.shitTag;
     public Shit(Demo demo){
         super(demo,GameSegment.shitColor);
-        this.tag = GameObject.shitTag;
     }
     protected boolean crash;
     protected int axis,pixels;
@@ -87,7 +87,7 @@ public class Shit extends GameObject{
                 x = (axis == Demo.RIGHT?0:GameSegment.rectHCount - 1);
             }
             if(this.demo.data[x][y] == 0){
-                this.demo.data[x][y] = this.tag;
+                this.demo.data[x][y] = tag;
                 break;
             }
         }

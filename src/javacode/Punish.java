@@ -1,9 +1,9 @@
 package javacode;
 
 public class Punish extends GameObject{
+    public static int tag = GameObject.punishTag;
     public Punish(Demo demo) {
         super(demo,GameSegment.punishColor);
-        this.tag = GameObject.punishTag;
     }
     public boolean visible(){
         return true;
@@ -28,22 +28,22 @@ public class Punish extends GameObject{
         if(Math.random() * 5 < 4){
             if(this.demo.data[demo.headX][demo.headY] == Demo.UP){
                 x = demo.headX;
-                y = demo.headY - Demo.randInt(4,12);
+                y = demo.headY - Demo.randInt(7,13);
             }
             else if(this.demo.data[demo.headX][demo.headY] == Demo.DOWN){
                 x = demo.headX;
-                y = demo.headY + Demo.randInt(4,12);
+                y = demo.headY + Demo.randInt(7,13);
             }
             else if(this.demo.data[demo.headX][demo.headY] == Demo.LEFT){
-                x = demo.headX - Demo.randInt(4,12);
+                x = demo.headX - Demo.randInt(7,13);
                 y = demo.headY;
             }
             else{
-                x = demo.headX + Demo.randInt(4,12);
+                x = demo.headX + Demo.randInt(7,13);
                 y = demo.headY;
             }
             if(x >= 0 && x < GameSegment.rectWCount && y >= 0 && y < GameSegment.rectHCount && this.demo.data[x][y] == 0){
-                this.demo.data[x][y] = this.tag;
+                this.demo.data[x][y] = tag;
                 this.remainingTime = 1800;
                 exists = true;
             }
@@ -53,7 +53,7 @@ public class Punish extends GameObject{
                 x = Demo.randInt(0,50);
                 y = Demo.randInt(0,50);
                 if(this.demo.data[x][y] == 0){
-                    this.demo.data[x][y] = this.tag;
+                    this.demo.data[x][y] = tag;
                     break;
                 }
             }

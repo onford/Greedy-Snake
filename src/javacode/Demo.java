@@ -2,16 +2,15 @@ package javacode;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.sql.Array;
+import java.util.*;
+import java.util.List;
 
 public class Demo {
     protected Award awardObj;
-    protected Punish punishObj;
-    protected Super superObj;
-    protected Shit shitObj;
+    protected List<Punish> punishList = new ArrayList<>() ;
+    protected List<Super> superList = new ArrayList<>();
+    protected List<Shit> shitList = new ArrayList<>();
     public static final int UP = 1,DOWN = 2,LEFT = 3,RIGHT = 4,NULLDIRECTION = 0;
     public static final Set<Integer> directionSet = new HashSet<>(){{
         add(UP);add(DOWN);add(LEFT);add(RIGHT);
@@ -39,19 +38,27 @@ public class Demo {
      */
     public void rePlay(){
         this.awardObj = new Award(this);
-        this.punishObj = new Punish(this);
-        this.superObj = new Super(this);
-        this.shitObj = new Shit(this);
+        this.punishList.clear();
+        this.superList.clear();
+        this.shitList.clear();
+        for(int i = 0;i < 1;i++)
+            this.punishList.add(new Punish(this));
+        for(int i = 0;i < 1;i++)
+            this.superList.add(new Super(this));
+        for(int i = 0;i < 1;i++)
+            this.shitList.add(new Shit(this));
         this.replayTag = this.exitTag = this.gameOverTag = this.registerState = false;
         this.speed = Speed.LOW;
         this.stackAction = this.registerAction = NULLDIRECTION;
-        length = GameSegment.initialLength;
-        score = GameSegment.initialScore;
-        lengthString = Integer.toString(length);
-        scoreString = Integer.toString(score);
+        this.changeLength(GameSegment.initialLength);
+        this.changeScore(GameSegment.initialScore);
         directionChanged = hideString = false;
-        this.punishObj.remainingTime = GameSegment.punishInitPeriod;
-        this.superObj.remainingTime = GameSegment.superInitPeriod;
+        for(Punish punishObj : this.punishList)
+            punishObj.remainingTime = (int) (GameSegment.punishInitPeriod * Math.random());
+        for(Super superObj : this.superList)
+            superObj.remainingTime = (int) (GameSegment.superInitPeriod * Math.random());
+        for(Shit shitObj : this.shitList)
+            shitObj.remainingTime = (int) (GameSegment.shitInitPeriod * Math.random());
         data = new int [GameSegment.rectWCount][GameSegment.rectHCount];
         for(int i = 1;i <= GameSegment.initialLength;i++)
             data[i][3] = RIGHT;
@@ -81,8 +88,9 @@ public class Demo {
             return false;
         }
         // 如果答辩撞到蛇头了，那么游戏结束
-        if(this.shitObj.exists)
-            this.gameOverTag = this.shitObj.move();
+        for(Shit shitObj : this.shitList)
+            if(shitObj.exists)
+                this.gameOverTag = shitObj.move();
         // 蛇身假移动，只检查走一步是否会 GameOver
         if(!this.gameOverTag){
             this.registerState = true;
@@ -123,10 +131,13 @@ public class Demo {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                for(Punish punishObj : this.punishList)
                 // 更新三个方块的剩余时间
-                punishObj.renewTime(240 / this.speed / GameSegment.rectSize);
-                superObj.renewTime(240 / this.speed / GameSegment.rectSize);
-                shitObj.renewTime(240 / this.speed / GameSegment.rectSize);
+                    punishObj.renewTime(240 / this.speed / GameSegment.rectSize);
+                for(Super superObj : this.superList)
+                    superObj.renewTime(240 / this.speed / GameSegment.rectSize);
+                for(Shit shitObj : this.shitList)
+                    shitObj.renewTime(240 / this.speed / GameSegment.rectSize);
             }
             movingPix = 0;
             this.move(true);
@@ -212,63 +223,56 @@ public class Demo {
      * @return 是否游戏结束
      */
     public boolean move(boolean reallyMove){
-        int nowState;
+        int originState;
+//        System.out.println("tailX: " + tailX + "tailY:" + tailY);
         // 看看是不是遇到答辩袭击了，如果是的话需要损失袭击处到蛇尾的所有长度，并相应地扣除分数值
-        if(shitObj.crash && reallyMove) {
-            shitObj.crash = false;
-            while (tailX != shitObj.x || tailY != shitObj.y) {
-                changeLength(length - 1);
-                score = Math.max(GameSegment.shitScoreLBound,score - GameSegment.shitScoreDec);
-                nowState = data[tailX][tailY];
-                data[tailX][tailY] = 0;
-                tailX += XDiff.get(nowState);
-                tailY += YDiff.get(nowState);
-            }
-            changeLength(length - 1);
-            score = Math.max(GameSegment.shitScoreLBound,score - GameSegment.shitScoreDec);
-            nowState = data[tailX][tailY];
-            tailX += XDiff.get(nowState);
-            tailY += YDiff.get(nowState);
-            data[shitObj.x][shitObj.y] = shitObj.tag;
-        }
+        if(reallyMove)
+            for(Shit shitObj : this.shitList)
+                if(shitObj.crash) {
+                    shitObj.crash = false;
+                    while (tailX != shitObj.x || tailY != shitObj.y) {
+                        changeLength(length - 1);
+                        score = Math.max(GameSegment.shitScoreLBound,score - GameSegment.shitScoreDec);
+                        tailMove();
+                    }
+                    changeLength(length - 1);
+                    score = Math.max(GameSegment.shitScoreLBound,score - GameSegment.shitScoreDec);
+                    tailMove();
+                    data[shitObj.x][shitObj.y] = Shit.tag;
+                }
         if(reallyMove)
             directionChanged = false;
-        nowState = data[headX][headY];
-        headX += XDiff.get(nowState);
-        headY += YDiff.get(nowState);
         // 检查游戏是否结束：撞墙、撞答辩、撞到蛇身或者分数耗尽，任何一个都能使游戏结束
-        if(headX < 0 || headX >= GameSegment.rectWCount || headY < 0 || headY >= GameSegment.rectHCount || data[headX][headY] > 0 && data[headX][headY] <= RIGHT || score == 0 || headX == shitObj.x && headY == shitObj.y){
-            headX -= XDiff.get(nowState);
-            headY -= YDiff.get(nowState);
+        if(judgeGameOver())
             return true;
-        }
+        originState = headMove();
         // 吃到了奖励方块
-        if(data[headX][headY] == awardObj.tag){
+        if(originState == Award.tag){
             if (reallyMove){
-                data[headX][headY] = nowState;
                 awardObj.exists = false;
                 changeLength(length + 1);
                 changeScore(score + GameSegment.awardScoreInc);
             }
-            else{
-                headX -= XDiff.get(nowState);
-                headY -= YDiff.get(nowState);
-            }
+            else
+                headBack(originState);
             return false;
         }
         // 吃到了惩罚方块
-        else if(data[headX][headY] == punishObj.tag){
+        else if(originState == Punish.tag){
             int originScore = score;
             changeScore(Math.max(0,score - GameSegment.punishScoreDec));
             if(reallyMove){
-                data[headX][headY] = nowState;
-                punishObj.exists = false;
-                punishObj.remainingTime = GameSegment.punishSummonPeriod;
+                for(Punish punishObj : this.punishList){
+                    if(punishObj.x == headX && punishObj.y == headY){
+                        punishObj.exists = false;
+                        punishObj.remainingTime = GameSegment.punishSummonPeriod;
+                        break;
+                    }
+                }
+                tailMove();
             }
-            else{
-                headX -= XDiff.get(nowState);
-                headY -= YDiff.get(nowState);
-            }
+            else
+                headBack(originState);
             if(score == 0){
                 if(!reallyMove)
                     this.score = originScore;
@@ -277,33 +281,68 @@ public class Demo {
             return false;
         }
         // 吃到了彩蛋方块
-        else if(data[headX][headY] == superObj.tag){
+        else if(originState == Super.tag){
             if(reallyMove){
-                data[headX][headY] = nowState;
                 changeScore(score + GameSegment.superScoreInc);
-                superObj.exists = false;
-                superObj.remainingTime = GameSegment.superSummonPeriod;
+                for(Super superObj : this.superList){
+                    if(superObj.x == headX && superObj.y == headY){
+                        superObj.exists = false;
+                        superObj.remainingTime = GameSegment.superSummonPeriod;
+                        break;
+                    }
+                }
+                tailMove();
             }
-            else {
-                headX -= XDiff.get(nowState);
-                headY -= YDiff.get(nowState);
-            }
+            else
+                headBack(originState);
             return false;
         }
-        // 尾部向前移动，蛇才是完整地移动了
-        if(reallyMove){
-            data[headX][headY] = nowState;
-            nowState = data[tailX][tailY];
-            data[tailX][tailY] = 0;
-            tailX += XDiff.get(nowState);
-            tailY += YDiff.get(nowState);
-        }
-        // 如果只是假移动，撤回之前蛇头的移动
-        else{
-            headX -= XDiff.get(nowState);
-            headY -= YDiff.get(nowState);
-        }
+        // 啥都没吃到，尾巴也得前进
+        if(reallyMove)
+            tailMove();
+        else
+            headBack(0);
         return false;
+    }
+    protected boolean judgeGameOver(){
+        int nextX = headX + XDiff.get(data[headX][headY]), nextY = headY + YDiff.get(data[headX][headY]);
+        for(Shit shitObj : this.shitList)
+            if(shitObj.x == nextX && shitObj.y == nextY)
+                return true;
+        return nextX < 0 || nextX >= GameSegment.rectWCount || nextY < 0 || nextY >= GameSegment.rectHCount || data[nextX][nextY] > 0 && data[nextX][nextY] <= RIGHT || score == 0;
+    }
+
+    /**
+     * 蛇头向前移动。
+     * @return 移动到的方块原来的内容。
+     */
+    protected int headMove(){
+        int nowState = data[headX][headY],originState;
+        headX += XDiff.get(nowState);
+        headY += YDiff.get(nowState);
+        originState = data[headX][headY];
+        data[headX][headY] = nowState;
+        return originState;
+    }
+
+    /**
+     * 蛇头回退。
+     * @param originState 蛇头覆盖的地方原来的内容。
+     */
+    protected void headBack(int originState){
+        int nowState = data[headX][headY];
+        data[headX][headY] = originState;
+        headX -= XDiff.get(nowState);
+        headY -= YDiff.get(nowState);
+    }
+    /**
+     * 蛇尾往前移动。
+     */
+    protected void tailMove(){
+        int nowState = data[tailX][tailY];
+        data[tailX][tailY] = 0;
+        tailX += XDiff.get(nowState);
+        tailY += YDiff.get(nowState);
     }
     public void gameOverFlash(){
         for(int i = 0;i < GameSegment.rectWCount;i++)

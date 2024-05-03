@@ -1,9 +1,9 @@
 package javacode;
 
 public class Super extends GameObject{
+    public static int tag = GameObject.superTag;
     public Super(Demo demo){
         super(demo,GameSegment.superColor);
-        super.tag = GameObject.superTag;
     }
     public boolean visible(){
         return this.remainingTime >= 800 || (this.remainingTime + 60) / 120 % 2 == 1;
@@ -27,7 +27,7 @@ public class Super extends GameObject{
             x = Demo.randInt(0,50);
             y = Demo.randInt(0,50);
             if(this.demo.data[x][y] == 0) {
-                this.demo.data[x][y] = this.tag;
+                this.demo.data[x][y] = Super.tag;
                 break;
             }
         }

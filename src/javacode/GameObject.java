@@ -7,7 +7,7 @@ public abstract class GameObject {
     protected Color color;
     protected Demo demo;
     protected boolean appeared,exists = false;
-    protected int remainingTime,tag,x,y;
+    protected int remainingTime,x,y;
     public GameObject(){
 
     }
